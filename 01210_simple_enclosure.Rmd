@@ -1,0 +1,49 @@
+	 vim:linebreak:nowrap:nospell:cul tw=78 fo=tqlnr foldcolumn=3 
+--- 
+title: Template for .Rmd 
+date: "`r paste('last updated', 
+    format(lubridate::now(), '%H:%M, %d %B %Y'))`"
+output: 
+  pdf_document: 
+    latex_engine: xelatex
+toc: TRUE 
+toc_depth:  1 
+fontsize: 12pt 
+geometry: margin=0.5in,top=0.25in 
+TAGS:  enclosure, envir, Grolemund, 
+---
+
+
+## Simple enclosure,based on Grolemund Chapter 8 (2014)
+```{r setup, include=FALSE		}
+knitr::opts_chunk$set(echo = TRUE,
+                      comment = "      ##",
+                      error = TRUE,
+                      collapse = TRUE)
+library(jimTools)
+``` 
+```{r counter}
+
+counter  <- function(n) {
+  N  <- n   # do not change N
+
+  get_number  <- function() n
+  next_number  <- function() assign ("n", n + 1, envir = globalenv())
+  reset_number  <- function() assign("n", N, envir = globalenv())
+    #  n <<- N this sets n in runtime env of counter!
+
+
+  list(get_number = get_number,
+       next_number = next_number,
+       reset_number = reset_number)
+}
+n  <- 10
+number  <- counter(n)
+number$get_number()
+
+number$next_number()
+n
+l  <- number$reset_number()
+l
+n
+```

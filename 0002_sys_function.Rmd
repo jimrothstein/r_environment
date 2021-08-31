@@ -1,0 +1,86 @@
+---
+title: "sys.function()"
+author: "jim"
+date: 2020-07-23T21:13:14-05:00
+categories: ["R"]
+tags: ["R Markdown", "plot", "regression", "env"]
+output:  
+  html_document:
+    keep_md: true
+---
+In last post, traced what happens when a() calls b() and used nframe.
+
+
+```{r begin, eval = FALSE , include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+library(jimTools)
+library(blogdown)
+
+#knitr::knit_exit()
+```
+```{r eval=FALSE  }
+
+rmarkdown::render("~/code/hugo_projects/blog/content/post/0002_sys_function.Rmd")
+```
+
+
+
+Build upon sys.nframe():
+sys.function(which)  gives us actual function
+```{r sys_function}
+
+a  <- function() {
+  print("a------ ")
+  cat("nframe = ", sys.nframe() , "\n")
+  print(sys.call(which=0))
+  print(sys.call(which=-1))
+  print(sys.function(1))
+  b()
+}
+
+b   <- function(){ 
+  print("b------ ")
+  cat("nframe = ", sys.nframe() , "\n")
+  print(sys.function(-1))   # count back by 1 (a)
+  c()
+}
+
+c  <- function(){ 
+  print("c------ ")
+  cat("nframe = ", sys.nframe() , "\n")
+  print(sys.function(-2))   # count back by 2 (a)
+  print(sys.function(-3))   # count back by 3 (f)
+}
+
+
+cat("nframe = ", sys.nframe() , "\n")
+
+f  <- function() a()
+f()
+```
+```{r sys.call}
+
+a  <- function() {
+  print("a------ ")
+  print(sys.call(which=0))
+  print(sys.call(which=-1))
+  b()
+}
+
+b   <- function(){ 
+  print("b------ ")
+  print(sys.call(which=0))
+  c()
+}
+
+c  <- function(){ 
+  print("c------ ")
+  print(sys.call(which=0))
+}
+
+
+cat("nframe = ", sys.nframe() , "\n")
+
+f  <- function() a()
+f()
+

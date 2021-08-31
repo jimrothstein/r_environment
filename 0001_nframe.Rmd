@@ -1,0 +1,202 @@
+---
+title: "sys.nframe()"
+author: "jim"
+date: 2020-07-23T21:13:14-05:00
+---
+
+```{r setup, eval = FALSE , include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+library(rmarkdown)
+```
+
+In prior post, used ls() to list objects in a environment.   Often the
+environment is .global_env() but when a function is called it executes in its
+own environment.
+
+
+Here we see what happens when one function calls another and we examine 
+sys.nframe()
+
+
+### nframe:  index of current frame | takes no arguments
+
+```{r wrapper_nframe}
+
+parentls <- function() {
+  cat("nframe = ", sys.nframe() , "\n")
+}
+
+{
+cat("nframe = ", sys.nframe() , "\n")
+parentls()
+}
+```
+
+How many levels down ?  0=GlobalEnv, 1= 1 level
+```{r nframe_levels}
+
+
+f  <- function() {
+  parentls()
+}
+
+{
+cat("nframe = ", sys.nframe() , "\n")
+parentls()
+f()
+}
+
+
+```
+  
+### sys.parent() works opposite direction to nframe
+```{r sys_parent}
+sys.parent(n = 1)
+
+# n=1 is parent, n=2 grandparent
+f  <- function(n=NULL) {
+  sys.parent(n)
+}
+
+f(0)
+f(1)
+f(2)
+
+
+# To get environment of ancestor frame
+
+# n=1 is parent, n=2 grandparetn
+g  <- function(n=NULL) {
+  sys.frame(sys.parent(n))}
+}
+
+g(1)
+g(0)
+
+```
+
+### sys.frame() takes n, returns env
+
+```{r sys_frame}
+sys.frame()
+sys.status()
+
+f  <- function(){
+  sys.status()
+}
+z  <- f()
+z$sys.frames
+
+### and this is parent env of frame one level down.
+parent.env(z$sys.frames[[1]])
+```
+
+```{r}
+
+a  <- function() {
+  cat("nframe = ", sys.nframe() , "\n")
+  b()
+}
+
+b   <- function(){ 
+  cat("nframe = ", sys.nframe() , "\n")
+  sys.status()
+}
+
+a()
+
+
+```
+
+### 2 environemtns for a function !
+```{r two_env}
+E1  <- new.env()
+E1$x  <- 0
+
+E2  <- new.env()
+E2$x  <- 10
+
+
+f  <- function() {
+  print(x)
+}
+environment(f)  <- E2
+f()
+
+
+environment(f)  <- E1
+f()
+
+```
+
+
+
+```{r more}
+
+
+
+a  <- function() {
+  cat("nframe = ", sys.nframe() , "\n")
+  b()
+}
+
+b   <- function(){ 
+  cat("nframe = ", sys.nframe() , "\n")
+  c()
+}
+
+c  <- function(){ 
+  cat("nframe = ", sys.nframe() , "\n")
+}
+
+
+cat("nframe = ", sys.nframe() , "\n")
+a() # objects in a's environment
+
+f  <- function() a()
+f()
+```
+recursive!
+sys.nframe()
+blogdown has trouble  Cstack; 
+```{r loop, eval=FALSE, include=FALSE   }
+cat("nframe = ", sys.nframe() , "\n")
+a  <- function() {
+  if (sys.nframe() == 9) return()
+  cat("nframe = ", sys.nframe() , "\n")
+  a()
+}
+a()
+```
+
+```{r render, eval=FALSE  }
+rmarkdown::render(
+   "/home/jim/code/hugo_projects/blog/content/post/0001_nframe.Rmd", 
+   output_format = "pdf_document",
+   output_file= "~/Downloads/print_and_delete/out.pdf")
+```
+
+
+old
+AAA Example:   objects in calling env() (or parent.frame())
+https://stackoverflow.com/questions/28641395/what-is-parent-frame-of-r
+```{r main}
+# objects in parent.frame (calling env)
+parentls <- function() {
+  ls(envir = parent.frame())
+}
+
+a<-function() {
+    x <- 5
+    parentls()
+}
+
+b <- function() {
+    z <- 10
+    parentls()
+ }
+
+a() # objects in a's environment
+b()
+parentls()
+```

@@ -1,0 +1,94 @@
+---
+title: "`r knitr::current_input()`"
+author: "jim"
+date: "`r paste('last updated', 
+    format(lubridate::now(), ' %d %B %Y'))`"
+output:   
+  html_document:  
+        code_folding: show
+        toc: true 
+        toc_depth: 2
+        toc_float: true
+  pdf_document:   
+    latex_engine: xelatex  
+    toc: true
+    toc_depth:  2   
+fontsize: 11pt   
+geometry: margin=0.5in,top=0.25in   
+categories: ["R"]  
+tags: ["R Markdown", "plot", "regression"]  
+---
+
+## Suppose we have a helper function that is frequently used by a regular
+function.
+
+
+```{r setup, eval=FALSE , include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+library(jimTools)
+library(blogdown)
+
+# knitr::knit_exit()
+```
+
+works, but restricted to f  ONLY
+```{r case_one}
+
+f <-  function(x) {
+
+  .helper  <- function(i) {
+    paste0(x, " x 10^",i)
+  }
+
+  i  <- sample((0:9), size = 1)
+  .helper(i)
+}
+
+f(3)
+
+```
+
+You may be surprised 
+not self-contained
+```{r case_two}
+f  <- function(x) {
+  i  <- sample((0:9), size=1)
+  .helper(i)
+}
+.helper  <- function(i) {
+    paste0(x, " x 10^",i)
+}
+
+f(3)  # fails!
+
+x  <- 4
+f(x)  # works!
+```
+
+```{r case_three}
+f  <- NULL
+x  <- NULL
+f  <- function(x) {
+  i  <- sample((0:9), size=1)
+  .helper(current_env())
+}
+
+.helper  <- function(e) {
+    paste0(e$x, " x 10^",e$i)
+}
+
+f(3)
+```
+
+
+
+```{r render, eval=FALSE, include = FALSE     }
+
+file  <- "blog/content/post/0020_helper_function.Rmd"
+rmarkdown::render(
+   file = file,
+   output_format = "html_document",
+   # output_format = "pdf_documemnt",
+   output_file="~/Downloads/print_and_delete/out")
+
+```

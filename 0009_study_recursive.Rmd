@@ -1,0 +1,59 @@
+---  
+title: "recursive: nframe" 
+author: "jim"  
+date: 2020-07-23T21:13:14-05:00  
+categories: ["R"]  
+tags: ["R Markdown", "plot", "regression"]  
+---  
+
+
+```{r setup, eval=FALSE , include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+library(jimTools)
+library(blogdown)
+
+knitr::knit_exit()
+```
+
+Recursive
+AAA How many levels down ?  0=GlobalEnv
+
+sys.calls()
+sys.frames()
+sys.parents()
+sys.nframe()
+```{r loop, eval=FALSE}
+a  <- function() {
+  if (sys.nframe() == 9) 
+    return( list(
+                 
+                 calls = sys.calls(),
+                 frames = sys.frames(),
+                 parents = sys.parents()
+                 )
+  )
+  
+  cat("nframe = ", sys.nframe() , "\n")
+  a()
+}
+l  <- a()
+
+l$calls
+l$frames
+l$frames[[1]]
+
+l$parents
+tibble::tibble(calls = unlist(l$calls), "parents_nframe" = l$parents)
+# knitr::knit_exit()
+```
+
+
+```{r render, eval=FALSE, include = FALSE     }
+rmarkdown::render(
+   "/home/jim/code/hugo_projects/blog/content/post/0001A_nframe.Rmd", 
+   output_format = "html_document",
+   output_file="~/Downloads/print_and_delete/out.html")
+
+   # output_format = "pdf_document",
+   # output_file= "~/Downloads/print_and_delete/out.pdf")
+```

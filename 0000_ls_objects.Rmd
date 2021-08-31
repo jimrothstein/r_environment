@@ -1,0 +1,104 @@
+---   
+title:   "ls"  
+date:  "today"  
+output:   
+  pdf_document:   
+    latex_engine: xelatex
+  html_document:  
+        code_folding:  show
+        toc: true 
+        toc_depth: 2
+        toc_float: true
+fontsize: 11pt 
+geometry: margin=0.5in,top=0.25in 
+TAGS:  ls, environment
+---
+
+### Simple Uses of ls()
+```{r setup, include=FALSE		}
+knitr::opts_chunk$set(echo = TRUE,
+                      comment = "      ##",
+                      error = TRUE,
+                      collapse = TRUE)
+```
+
+
+```{r library, include=FALSE		}
+library(jimTools)
+``` 
+
+ls() returns objects in character vector.
+```{r simple}
+x  <- 2
+y  <- 2*x
+ls()
+```
+
+ls() includes name of functions.
+```{r add_fun}
+ls()
+f  <- function() {
+  z  <- 2
+}
+
+ls()  # includes f
+```
+
+environment is ....
+environment() returns <env>, one of R's typeof
+```{r}
+environment()
+typeof(environment())
+```
+
+in fact,  R has a whole tree of environments
+search
+```{r search}
+search()
+```
+
+objects inside a package
+```{r}
+
+# 1st 9
+ls(envir=as.environment("package:usethis"))[1:9]
+```
+
+
+
+
+ls(envir=as.environment("package:usethis"))
+And you can add your own, sometimes R creates its won.
+
+Example, Modify f 
+```{r modify_f}
+ls()
+
+f  <- function() {
+  z  <- 2
+  print(environment())
+  print(ls())
+}
+
+ls()  # includes f and g
+
+```
+
+```{r f}
+f()
+```
+
+
+
+
+
+\newpage
+
+```{r render, eval=FALSE	} 
+file  <- "0000_ls_objects.Rmd"
+file
+rmarkdown::render(file,
+                  output_format= "html_document",
+                  output_dir=".")
+```
+

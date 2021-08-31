@@ -1,0 +1,225 @@
+--- 
+title: Template for .Rmd 
+date: "`r paste('last updated', 
+    format(lubridate::now(), '%H:%M, %d %B %Y'))`"
+output: 
+  pdf_document: 
+    latex_engine: xelatex
+toc: TRUE 
+toc_depth:  1 
+fontsize: 12pt 
+geometry: margin=0.5in,top=0.25in 
+TAGS:  envir, defer,local
+---
+
+ ======================================================
+withr::  way to temporily change values and then reset
+ ======================================================
+ REF: jenny bryan
+ https://www.tidyverse.org/blog/2020/04/self-cleaning-test-fixtures/
+
+
+```{r setup, include=FALSE		}
+knitr::opts_chunk$set(echo = TRUE,
+                      comment = "      ##",
+                      error = TRUE,
+                      collapse = TRUE)
+library(jimTools)
+library(withr)
+```
+
+
+
+change state:   poor
+```{r begin}
+sloppy <- function(x, sig_digits) {
+  options(digits = sig_digits)
+  print(x)
+}
+# old state
+old  <- getOption("digits")    # 3
+old
+pi
+
+# now
+sloppy(pi, 4)
+# but state has changed!
+pi
+
+
+#  reset
+options("digits"  = old)
+pi
+```
+
+withr::
+```{r withr}
+neater <- function(x, sig_digits) {
+  # store old in op; 
+  op <- options(digits = sig_digits)
+  withr::defer(options(op))   # LIFO
+  print(x)
+}
+
+pi
+neater(pi, 7)
+pi
+```
+
+Problem:  Defer runs at end  (when exiting frame)
+```{r lifo}
+defer_stack <- function() {
+  cat("put on socks\n")
+ withr::defer(cat("take off socks\n"))
+}
+
+defer_stack()
+```
+
+Two defer, use LIFO 
+```{r lifo2}
+defer_stack <- function() {
+ cat("put on socks\n")
+ withr::defer(cat("1-take off socks\n"))  # on stack
+
+ cat("put on shoes\n")
+ withr::defer(cat("2-take off shoes\n")) # on top of stack
+}
+defer_stack()  # use LIFO
+```
+
+Want FIFO? priority = last
+```{r fifo}
+defer_queue <- function() {
+  cat("Adam gets in line for ice cream\n")
+  withr::defer(cat("Adam gets ice cream\n"), priority = "last")
+
+  cat("Beth gets in line for ice cream\n")
+  withr::defer(cat("Beth gets ice cream\n"), priority = "last")
+}
+defer_queue()
+```
+
+Fix cat (seems like kluge)
+```{r lifo2}
+##  defer runs when exiting frame
+##  here manipulate WHICH of 2 defers run first (default: lifo)
+defer_stack_fifo <- function() {
+ cat("put on socks\n")
+ withr::defer(cat("1-take off socks\n"), priority="last")  # on stack
+
+ cat("put on shoes\n")
+ withr::defer(cat("2-take off shoes\n"), priority="first" ) # on top of stack
+}
+defer_stack_fifo()  # 
+```
+
+```{r local1}
+x  <- 1
+local( {
+  x  <- 2
+  print(x)
+})
+print(x)
+
+
+
+x  <- 1
+local( {
+  x  <- 2
+  print(x)
+  print(environment())
+  print(attributes(environment()))
+})
+print(environment())
+print(x)
+
+```
+
+set, reset an option
+```{r}
+print(pi)
+
+sig_digits  <- 7   # set
+op <- options(digits = sig_digits)
+print(pi)
+
+options(op)  # reset
+print(pi)
+```
+
+basic use of local({}, envir = )
+```{r}
+x  <- 0
+e1  <- new.env()
+e1$x  <- 1
+
+e2  <- new.env()
+e2$x   <- 2
+
+local( envir = globalenv(), {print(x)})
+local( envir = e1, {print(x)})
+local( envir = e2, {print(x)})
+x
+
+```
+
+local(exprs, envir=env.new())
+```{r local}
+print(pi)
+local( {
+  browser() 
+  old  <- getOption("digits")    # 3
+  options(digits = 7)
+  print(pi)
+  options(digits = old)   # reset, quote req'd
+  }
+)
+print(pi)
+
+options(digits =4)
+options(digits =3  )
+```
+
+
+BEGIN HERE:   stuck on environments again.
+improved neater
+```{r improve}
+sys.nframe()  # Global
+local_digits <- function(sig_digits, envir = parent.frame()) {
+  op <- options(digits = sig_digits)
+  print(envir)
+  withr::defer(options(op), envir = envir)
+
+}
+parent.frame()  # Global
+
+neato <- function(x, digits) {
+  sys.nframe()
+  local_digits(digits)
+  print(x)
+}
+pi
+local_digits(3)
+neato(pi, 7)
+pi
+
+
+```
+
+***
+
+```{r knit_exit()} 
+knitr::knit_exit()
+```
+
+/newpage
+
+```{r render, eval=FALSE	} 
+file <- ""
+file  <- basename(file)
+dir <- "rmd"
+
+jimTools::ren_pdf(file,dir)
+jimTools::ren_github(file, dir)
+```

@@ -1,0 +1,162 @@
+---
+title: "parent.frame()"
+author: "jim"
+date: 2020-17-23T21:13:14-05:00
+categories: ["R"]
+tags: ["R Markdown", "plot", "regression"]
+---
+
+```{r setup, eval = FALSE , include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+library(jimTools)
+library(blogdown)
+
+knitr::knit_exit()
+```
+
+## Calling environment is found with base::parent.frame() 
+  - parent.frame of R_GlobalEnv is itself
+
+```{r simple}
+
+parent.frame() 
+
+f  <- function() print(parent.frame())  
+f()  # also R_GlobalEnv
+
+```
+
+Calling env of g is env for f
+```{r not_global}
+
+g  <- function() print(parent.frame())
+
+f <- function() g()
+f()
+```
+
+
+Repeat, also find the frames, env
+-   
+-  Global takes value 0
+-  f , one level down, takes 1
+-  g,  two levels down, takes 2
+-  environment(), active env
+-  environment(h), env where h is defined
+-  parent.frame(), calling env
+
+```{r nframe_adv}
+
+g  <- function() {
+  cat("g:  nframe = ", sys.nframe() , "\n")
+  cat("g def env:  ")
+  print(environment(g))  # g is defined in Global
+
+  cat("g calling env: ")
+  print(parent.frame()) #  where called (inside f) 
+
+}
+
+f <- function() {
+  cat("f: nframe = ", sys.nframe() , "\n")
+  cat("f def env:  ")
+  print(environment(f))
+
+  cat("f active env:  ")
+  print(environment())
+  cat("\n")
+  g()
+}
+cat("nframe = ", sys.nframe() , "\n") # 0
+f()
+cat("nframe = ", sys.nframe() , "\n")
+
+```
+
+### NEED?
+```{r}
+# objects in parent.frame (calling env)
+parentls <- function() {
+  ls(envir = parent.frame())
+}
+
+a<-function() {
+    x <- 5
+    parentls()
+}
+
+b <- function() {
+    z <- 10
+    parentls()
+ }
+
+a() # objects in a's environment
+b()
+parentls()
+```
+
+
+AAA Example:   objects in calling env() (or parent.frame())
+https://stackoverflow.com/questions/28641395/what-is-parent-frame-of-r
+```{r}
+# objects in parent.frame (calling env)
+parentls <- function() {
+  ls(envir = parent.frame())
+}
+
+a<-function() {
+    x <- 5
+    parentls()
+}
+
+b <- function() {
+    z <- 10
+    parentls()
+ }
+
+a() # objects in a's environment
+b()
+parentls()
+```
+
+AAA How many levels down ?  0=GlobalEnv
+```{r nframe}
+parentls <- function() {
+  cat("nframe = ", sys.nframe() , "\n")
+}
+
+
+a  <- function() {
+  cat("nframe = ", sys.nframe() , "\n")
+  b()
+}
+
+b   <- function(){ 
+  cat("nframe = ", sys.nframe() , "\n")
+  c()
+}
+
+c  <- function(){ 
+  cat("nframe = ", sys.nframe() , "\n")
+}
+
+
+cat("nframe = ", sys.nframe() , "\n")
+a() # objects in a's environment
+
+f  <- function() a()
+f()
+```
+recursive!
+sys.nframe()
+```{r loop, eval=FALSE   }
+a  <- function() {
+  if (sys.nframe() == 9) return()
+  cat("nframe = ", sys.nframe() , "\n")
+  a()
+}
+a()
+knitr::knit_exit()
+```
+
+

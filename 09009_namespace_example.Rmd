@@ -1,0 +1,97 @@
+	 
+--- 
+# Spaces, no Tabs
+title: Template for .Rmd 
+date: "`r paste('last updated', 
+    format(lubridate::now(), '%H:%M, %d %B %Y'))`"
+output: 
+  pdf_document: 
+    latex_engine: xelatex
+toc: TRUE 
+toc_depth:  1 
+fontsize: 12pt 
+geometry: margin=0.5in,top=0.25in 
+---
+
+
+<!-- 
+set cul   "cursorline
+cc=+1			"colorcolumn is 1 more than tw
+-->
+
+<!--  commments -->
+
+```{r setup, include=FALSE		}
+knitr::opts_chunk$set(echo = TRUE,  
+											comment="      ##",  
+											error=TRUE, 
+											collapse=TRUE) 
+# use to render later
+file  <- paste0("env_code/", knitr::current_input())
+```
+
+<!--  RENDER:  see bottom -->
+
+```{r library, include=FALSE		}
+library(jimTools) 
+``` 
+
+https://github.com/pharmaR/riskmetric/issues/176
+```{r begin}
+file  <- knitr::current_input()
+file
+?getNamespaceExports()
+```
+
+```{r}
+# returns chr[]
+getNamespaceExports("dplyr")   #285
+
+# from help:
+# ns: string or namespace object.
+# name: string or name.
+
+# returns named data.frame x, freq
+z  <- getNamespaceExports("dplyr") %>% plyr::count()
+z %>% dplyr::filter(freq > 1)
+
+```
+
+```{r}
+# returns named list  x, freq
+# compare function names in 2 packages
+counts <- c(getNamespaceExports("plyr"), getNamespaceExports("dplyr")) %>% 
+  plyr::count() %>% 
+  dplyr::filter(freq > 1)
+counts
+nrow(counts)
+```
+
+***
+
+```{r knit_exit()} 
+# knitr::knit_exit() 
+```
+
+/newpage
+
+
+
+```{r render, eval=FALSE	} 
+file  <- here("env_code", "09009_namespace_example.Rmd")
+
+# file must be of form:
+# dir/name_of_this_file    where dir is relative to project root
+
+rmarkdown::render(file,
+                  #output_format = "pdf_document",
+                  output_format = "html_document",
+                  output_file = "~/Downloads/print_and_delete/out")
+
+
+root <- rprojroot::is_r_package
+root
+root$find_file()
+root$find_file("DESCRIPTION")
+root$find_file("09009_namespace_example.Rmd")
+```

@@ -1,0 +1,83 @@
+---
+title: "sys.nframe()"
+author: "jim"
+date: 2020-07-23T21:13:14-05:00
+categories: ["R"]
+tags: ["R Markdown", "plot", "regression"]
+---
+
+```{r setup,  include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE,
+                      comment = "      ##",
+                      error = TRUE,
+                      collapse = TRUE)
+```
+
+
+Before do anything, what frame # ?
+```{r start}
+cat("nframe = ", sys.nframe(), "\n")
+```
+
+```{r}
+a  <- function() {
+  sys.calls()
+}
+a()
+```
+
+How many levels down ?  
+
+  -  0=GlobalEnv  
+  -  chain of functions, a() calls b() ...  
+```{r nframe_levels}
+
+a  <- function() {
+  cat("nframe = ", sys.nframe() , "\n")
+  b()
+}
+
+b   <- function(){ 
+  cat("nframe = ", sys.nframe() , "\n")
+  c()
+}
+
+c  <- function(){ 
+  cat("nframe = ", sys.nframe() , "\n")
+  sys.calls()
+}
+
+
+cat("nframe = ", sys.nframe() , "\n")
+
+
+f  <- function() a()
+f()
+```
+recursive!
+sys.nframe()
+knitr/blogdown has trouble  Cstack; b/c nframe is already at 23!
+```{r loop, eval=FALSE   }
+cat("nframe = ", sys.nframe() , "\n")
+a  <- function() {
+  if (sys.nframe() == 9) return()
+  cat("nframe = ", sys.nframe() , "\n")
+  a()
+}
+a()
+# knitr::knit_exit()
+```
+
+```{r render, eval=FALSE, include = FALSE     }
+rmarkdown::render(
+   "/home/jim/code/hugo_projects/blog/content/post/0001A_nframe.Rmd", 
+   output_format = "html_document",
+   output_file="~/Downloads/print_and_delete/out.html")
+
+   # output_format = "pdf_document",
+   # output_file= "~/Downloads/print_and_delete/out.pdf")
+```
+
+
+

@@ -1,0 +1,47 @@
+#' get_environment returns tibble of environment
+#'
+#'
+#'
+#' @export
+get_environment  <- function() {
+
+# each row is char[1]	, 82 x 1
+# 
+t <- tibble::tibble(environment = Sys.getenv())
+
+# z  <- tibble::tibble(env=names(t$environment),
+#                   values = t[[1]])
+
+}
+## Excellent environment example!
+##
+## https://stackoverflow.com/questions/36182557/while-true-break-in-a-sub-environment
+## CAUTION:  multiple runs will break R session
+##
+## Error because deep inside an env
+##
+db  <- get_environment()
+db
+
+while(TRUE) {
+
+  g  <- function() break()
+  g()
+}
+
+## compare
+l <- list(x = 5)
+
+## throw error (to console) sees no level to break to
+while (TRUE){
+  with(l, if (x > 100) break else l$x <<- x + 5)
+}
+
+
+## To (break now runs in env of while, a function)
+l <- list(x = 5)
+while (TRUE){
+    env <- environment()
+    with(l, if (x > 100) evalq(expr = break, envir=env) else l$x <<- x + 5)
+}
+print(l$x)

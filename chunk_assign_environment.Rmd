@@ -1,0 +1,21 @@
+### Assign environment (here: to a function)
+```{r two_env}
+# file <- chunk_assign_environment.Rmd
+E1  <- new.env()
+E1$x  <- 0
+
+E2  <- new.env()
+E2$x  <- 10
+
+
+f  <- function() {
+  print(x)
+}
+environment(f)  <- E2
+f()
+
+
+environment(f)  <- E1
+f()
+
+```

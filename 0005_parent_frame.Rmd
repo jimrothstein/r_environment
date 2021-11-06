@@ -10,8 +10,6 @@ tags: ["R Markdown", "plot", "regression"]
 knitr::opts_chunk$set(collapse = TRUE)
 library(jimTools)
 library(blogdown)
-
-knitr::knit_exit()
 ```
 
 ## Calling environment is found with base::parent.frame() 
@@ -33,6 +31,43 @@ g  <- function() print(parent.frame())
 
 f <- function() g()
 f()
+```
+
+
+#### parent.frame() example
+  *  https://stackoverflow.com/questions/28641395/what-is-parent-frame-of-r
+  *  parent.frame() returns <env>, 
+```{r simple_parent_frame}
+{
+parent.frame()
+# cat(parent.frame())
+print(parent.frame())
+
+parentls <- function() {
+    cat("printls called from: ")
+    print(parent.frame())
+    ls(envir=parent.frame())
+}
+
+
+## what is calling env for parentls() ?
+a<-function() {
+    cat("a's execution envirnmemnt is: ")
+    print(environment())
+    x <- 5
+    parentls()
+}
+
+b <- function() {
+    z <- 10
+    parentls()
+ }
+
+a()
+b()
+
+environment(a)
+parent.env(environment(a))
 ```
 
 

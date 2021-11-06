@@ -49,31 +49,6 @@ f()
 
 ```
   
-### sys.parent() works opposite direction to nframe
-```{r sys_parent}
-sys.parent(n = 1)
-
-# n=1 is parent, n=2 grandparent
-f  <- function(n=NULL) {
-  sys.parent(n)
-}
-
-f(0)
-f(1)
-f(2)
-
-
-# To get environment of ancestor frame
-
-# n=1 is parent, n=2 grandparetn
-g  <- function(n=NULL) {
-  sys.frame(sys.parent(n))}
-}
-
-g(1)
-g(0)
-
-```
 
 ### sys.frame() takes n, returns env
 
@@ -108,26 +83,6 @@ a()
 
 ```
 
-### 2 environemtns for a function !
-```{r two_env}
-E1  <- new.env()
-E1$x  <- 0
-
-E2  <- new.env()
-E2$x  <- 10
-
-
-f  <- function() {
-  print(x)
-}
-environment(f)  <- E2
-f()
-
-
-environment(f)  <- E1
-f()
-
-```
 
 
 

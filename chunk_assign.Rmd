@@ -1,0 +1,28 @@
+```{r assign}
+## x must be quoted
+assign("x", "hello")
+print(x)
+
+E1  <- new.env()
+ls(E1)
+
+
+assign("x", "goodbye", envir=E1)
+
+print(x)
+print(E1$x)
+```
+
+
+
+```{r f}
+### similar for function
+f  <- function() print(x)
+
+f()
+
+environment(f)  <- E1
+f()
+
+```
+

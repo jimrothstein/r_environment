@@ -1,0 +1,19 @@
+
+in fact,  R has a whole tree of environments, related to loaded packages.
+search
+```{r search}
+#file <- "chunk_search.Rmd "
+tree  <- search()
+tree
+
+l  <- lapply(tree, ls)
+str(l)
+
+```
+
+ls objects inside a package
+```{r}
+
+# 1st 9 (of many)
+ls(envir=as.environment("package:usethis"))[1:9]
+```

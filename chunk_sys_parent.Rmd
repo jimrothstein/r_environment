@@ -1,0 +1,54 @@
+
+### sys.parent() works opposite direction to nframe
+```{r sys_parent}
+
+# file <- "chunk_sys_parent.Rmd "
+
+## sys.parent() is helper function, by itself is not very useful.
+
+## RECALL: frame number0 is global and increase by +1 for each level down.
+
+# ‘sys.parent’ returns the
+#      number of the parent frame if ‘n’ is
+#      1 (the default), the grandparent if
+#      ‘n’ is 2, and so on.  
+
+## INPUT:  n, which means number frames to go BACK.
+##          o is current , 1 would be parent, 2 grandparent
+
+## RETURNS: int, representing that frame 
+
+sys.parent(n = 0)
+sys.parent(n = 1)
+
+f  <- function(n=NULL) {
+  sys.parent(n)
+}
+
+f(0)
+f(1)
+f(2)
+
+
+# To get environment of ancestor frame
+
+# n=1 is parent, n=2 grandparetn
+g  <- function(n=NULL) {
+  sys.frame(sys.parent(n))}
+
+g(n = 0)  # current env
+g(1)      # parent env
+
+```
+
+
+```{r h}
+## Return Env
+h  <- function(n = NULL){
+    g(n)
+}
+h(n=0)   # inner most
+h(n=1)   # up 1 frame (parent)
+h(n=2)   # up 2 frames (grandparent) 
+```
+

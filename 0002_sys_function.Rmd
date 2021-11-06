@@ -18,11 +18,6 @@ library(blogdown)
 
 #knitr::knit_exit()
 ```
-```{r eval=FALSE  }
-
-rmarkdown::render("~/code/hugo_projects/blog/content/post/0002_sys_function.Rmd")
-```
-
 
 
 Build upon sys.nframe():
@@ -30,6 +25,7 @@ sys.function(which)  gives us actual function
 ```{r sys_function}
 
 a  <- function() {
+    browser()
   print("a------ ")
   cat("nframe = ", sys.nframe() , "\n")
   print(sys.call(which=0))
@@ -55,6 +51,7 @@ c  <- function(){
 
 cat("nframe = ", sys.nframe() , "\n")
 
+set.seed(2021)
 f  <- function() a()
 f()
 ```
@@ -83,4 +80,45 @@ cat("nframe = ", sys.nframe() , "\n")
 
 f  <- function() a()
 f()
+```
+
+#### Debug:  frames, from !so
+  *  See base::debug() for documentation
+  *  https://stackoverflow.com/questions/9796843/move-up-a-frame-debug-r-environment
+  *  f, g not nested
+```{r simplest_browser}
+
+f <- function() {
+   x <-1
+   browser()
+   g(x+1)
+}
+g <- function(z) {
+   y = z+2
+   return(y)
+}
+x  <- 100
+f()  #4
+
+```
+
+#### Stacktrace:  compare
+```{r stacktrace}
+f  <- function(){
+
+    g  <- function(){
+
+        h  <- function(x) {
+            browser()
+        }
+    h("hi")
+    }
+
+g()
+}
+
+f()
+```
+
+
 

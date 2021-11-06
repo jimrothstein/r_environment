@@ -1,0 +1,146 @@
+
+---
+title: "`r knitr::current_input()`"
+date: "`r paste('last updated', 
+    format(lubridate::now(), ' %d %B %Y'))`"
+header-includes:
+  - \usepackage{amssymb}
+  - \usepackage{bbm}
+  - \usepackage{threeparttable}
+  - \usepackage{forest}
+output:   
+  html_document:  
+        code_folding: show
+        toc: true 
+        toc_depth: 4
+        toc_float: true
+        mathjax: default
+#       extra_dependencies: ["amssymb", "bbm", "threeparttable", "forest"]
+  pdf_document:   
+    latex_engine: xelatex  
+    toc: true
+    toc_depth:  4 
+    extra_dependencies: ["amssymb", "bbm", "threeparttable", "forest"]
+fontsize: 11pt   
+geometry: margin=0.5in,top=0.25in   
+TAGS:  math, latex, trees, forest
+---
+
+<!--  
+as of August 2021
+-PDF works
+-HTML does NOT work
+-->
+
+
+### How many levels down ?  
+
+  -  0=GlobalEnv  
+  -  chain of functions, a() calls b() ...  
+```{r nframe_levels}
+
+a  <- function() {
+  cat("nframe = ", sys.nframe() , "\n")
+  b()
+}
+
+b   <- function(){ 
+  cat("nframe = ", sys.nframe() , "\n")
+  print(paste0("Called from ", sys.call()))
+  c()
+}
+
+c  <- function() {
+  cat("nframe = ", sys.nframe(), "\n")
+  print(paste0("Called from ", sys.call()))
+  #cat("called from ", sys.call(), "\n")
+  #sys.calls()
+}
+
+cat("nframe = ", sys.nframe(), "\n")
+
+f  <- function() a()
+f()
+```
+
+#### Embed `modified` latex equations inside Rmd; compile with knitr
+Seems to work Great (pdf:  even installs needed latex packages )
+
+
+#### Latex:  draw nframes
+
+\begin{forest}
+  for tree={
+    fit=band,% spaces the tree out a little to avoid collisions
+  }
+  [.GlobalEnv
+    [nframe=1, tier=vegetables
+      ["nframe=2", tier=fruits]
+    ]
+  ]
+\end{forest}
+
+#### Latex:  draw trees
+\begin{forest}
+  for tree={
+    fit=band,% spaces the tree out a little to avoid collisions
+  }
+  [things
+    [cabbages, tier=vegetables
+      [peaches, tier=fruits]
+    ]
+    [kings, tier=aristocrats]
+    [sealing wax
+      [queens, tier=aristocrats
+        [carrots, tier=vegetables]
+        [pineapple, tier=fruits]
+        [aubergine, tier=vegetables]
+      ]
+    ]
+  ]
+\end{forest}
+
+
+```{r setup, include=FALSE		}
+knitr::opts_chunk$set(echo = TRUE,
+                      comment = "      ##",
+                      error = TRUE,
+                      collapse = T   ) # easier to read
+```
+
+
+
+#### Raw latex
+  *  REF:  rmarkdown-cookbook, pandoc will leave as latex
+```{=latex}
+\begin{tabular}{ll}
+A & B \\
+A & B \\
+\end{tabular}
+```
+
+```{r render, eval=FALSE, include=FALSE 	} 
+# !zathura ~/Downloads/print_and_delete/ 
+# for debugging
+
+options(tinytex.verbose = TRUE)
+
+{
+  file <- "0410_latex_trees.Rmd"
+  #file  <- file.path(paste0("~/code/publish_project/MATH/", file))
+  #file  <- here("MATH", file)
+  file  
+}
+
+# NOTE:   .tex only works with PDF
+# NOTE:    tex will NOT work with html
+# in general, pdf will look nicer
+
+output_dir= Sys.getenv("OUTPUT_DIR")
+output_dir
+rmarkdown::render(file,
+                  output_format = "pdf_document"
+                  #output_format = "html_document",
+                  #output_dir = output_dir
+)
+```

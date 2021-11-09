@@ -1,0 +1,198 @@
+	 vim:linebreak:nowrap:nospell:cul tw=78 fo=tqlnr foldcolumn=3 
+--- 
+title: `knitr::content_input()` 
+date: "`r paste('last updated', 
+    format(lubridate::now(), '%H:%M, %d %B %Y'))`"
+output: 
+  pdf_document: 
+    latex_engine: xelatex
+toc: TRUE 
+toc_depth:  4 
+fontsize: 10pt 
+geometry: margin=0.5in,top=0.25in 
+TAGS:  env, frame
+---
+
+```{r setup, include=FALSE		}
+knitr::opts_chunk$set(echo = TRUE,
+                      comment = "      ##",
+                      error = TRUE,
+                      collapse = TRUE)
+
+
+```
+
+#### Ex 1: parent.frame? Use parent.frame to find objects in calling env. 
+  *  Example 1
+  *  https://stackoverflow.com/questions/28641395/what-is-parent-frame-of-r/28641459#28641459
+```{r parent.frame}
+
+
+##  Whenever parentls is called, ls reports back about calling environment.
+##  For parent.frame(n), default value of n is 1.
+
+parentls <- function(n) {
+  ls(envir=parent.frame(n))
+  # ls(envir=sys.frame(which=-2))   # also works!, but I have coded to use `n`.
+}
+
+## Since default of n = 1 in parent.frame, ls reports on  .Globalenv
+parentls()
+
+
+
+## use `index` to separate from `n`
+a<-function(index=NULL) {
+    x <- 5
+    parentls(index)
+}
+
+b <- function() {
+    z <- 10
+    parentls()
+ }
+
+## Fails because not allowed to see inside sys.
+a(index=0)
+
+a(index=1)
+# [1] "index" "x"    
+
+
+a(index=2)  # grandparent, no index, no n 
+# [1] "a"        "b"        "jim_lib"  "parentls"
+
+b()  # use defaults(n=1)
+# [1] "z"
+
+```
+
+#### Ex2: Move Up a Frame  
+  *  Using debugger (follow discussion in !so)
+  *  https://stackoverflow.com/questions/9796843/move-up-a-frame-debug-r-environment
+
+```{r move_up}
+{
+f <- function() {
+   
+   x <-1
+   g(x+1)
+}
+g <- function(z) {
+   browser()
+   y = z+2
+   return(y)
+}
+}
+f()
+
+```
+
+#### Ex3: Logging without an error
+https://stackoverflow.com/questions/64698732/how-to-show-stack-trace-without-error-in-r
+
+```{r logging}
+
+show_stack <- function() {
+  cat("#----- Stack containing call to show_stack -----#\n\n")
+  x <- sys.calls()
+  browser()
+  lapply(head(x, -1), function(x) {print(x); cat("\n")})
+  cat("#-----------------------------------------------#\n\n")
+}
+
+#  Which you just insert in whichever function you want to trace:
+
+f <- function() g()
+g   <- function() h()
+h <- function() show_stack()
+
+f()
+```
+
+#### Ex4:   Show n= and which= -   can be equivalent
+  *     (from sys.parent help) Notice that even though the sys.xxx functions (except sys.status) are
+    interpreted, their contexts are not counted nor are they reported. There
+    is no access to them. 
+  *  "Non-negative values of which are frame numbers starting from .GlobalEnv
+    whereas negative values are counted back from the frame number of the
+    current evaluation."
+```{r equal}
+
+f <- function() g()
+g   <- function() h()
+h <- function() browser() #sys.call(which) 
+
+debugonce(h)
+f()
+
+
+begin  <- function(e) {
+    which <<- e
+    f()
+}
+sapply(c(0, 1,2,3,4,5,6), begin)  # which > 0
+sapply(c(0, -1, -2), begin)   # which <0
+
+```
+
+#### EX 5:  from ?sys.function
+```{r}
+     require(utils)
+     
+     ## Note: the first two examples will give different results
+     ## if run by example().
+     ff <- function(x) gg(x)
+     gg <- function(y) sys.status()
+     str(ff(1))
+     
+     gg <- function(y) {
+         ggg <- function() {
+             cat("current frame is", sys.nframe(), "\n")
+             cat("parents are", sys.parents(), "\n")
+             print(sys.function(0)) # ggg
+             print(sys.function(2)) # gg
+         }
+         if(y > 0) gg(y-1) else ggg()
+     }
+     gg(3)
+     
+     t1 <- function() {
+       aa <- "here"
+       t2 <- function() {
+         ## in frame 2 here
+         cat("current frame is", sys.nframe(), "\n")
+         str(sys.calls()) ## list with two components t1() and t2()
+         cat("parents are frame numbers", sys.parents(), "\n") ## 0 1
+         print(ls(envir = sys.frame(-1))) ## [1] "aa" "t2"
+         invisible()
+       }
+       t2()
+     }
+     t1()
+     
+     test.sys.on.exit <- function() {
+       on.exit(print(1))
+       ex <- sys.on.exit()
+       str(ex)
+       cat("exiting...\n")
+     }
+     test.sys.on.exit()
+     ## gives 'language print(1)', prints 1 on exit
+     
+     ## An example where the parent is not the next frame up the stack
+     ## since method dispatch uses a frame.
+     as.double.foo <- function(x)
+     {
+         str(sys.calls())
+         print(sys.frames())
+         print(sys.parents())
+         print(sys.frame(-1)); print(parent.frame())
+         x
+     }
+     t2 <- function(x) as.double(x)
+     a <- structure(pi, class = "foo")
+     t2(a)
+     
+###
+```

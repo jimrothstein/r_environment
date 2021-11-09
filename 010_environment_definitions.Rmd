@@ -1,10 +1,10 @@
 	 vim:linebreak:nowrap:nospell:cul tw=78 fo=tqlnr foldcolumn=3 
 --- 
-title: `knitr::content_input()` 
+title: `knitr::content_input()` a
 date: "`r paste('last updated', 
     format(lubridate::now(), '%H:%M, %d %B %Y'))`"
 output: 
-  pdf_document: 
+  pdf_document:                            
     latex_engine: xelatex
 toc: TRUE 
 toc_depth:  1 

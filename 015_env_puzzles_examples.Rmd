@@ -1,17 +1,24 @@
-	 vim:linebreak:nowrap:nospell:cul tw=78 fo=tqlnr foldcolumn=3 
 --- 
-title: `knitr::content_input()` 
+title: "`r knitr::current_input()`"
 date: "`r paste('last updated', 
     format(lubridate::now(), '%H:%M, %d %B %Y'))`"
 output: 
+  html_document:  
+        code_folding: show
+        toc: true 
+        toc_depth: 4
+        toc_float: true
+        mathjax: default
   pdf_document: 
     latex_engine: xelatex
-toc: TRUE 
-toc_depth:  4 
+    toc: TRUE 
+    toc_depth:  4 
 fontsize: 10pt 
 geometry: margin=0.5in,top=0.25in 
 TAGS:  env, frame
 ---
+
+\small 
 
 ```{r setup, include=FALSE		}
 knitr::opts_chunk$set(echo = TRUE,
@@ -19,15 +26,62 @@ knitr::opts_chunk$set(echo = TRUE,
                       error = TRUE,
                       collapse = TRUE)
 
+if (file.exists("testdump.rda")) file.remove("testdump.rda")
+# from https://rdrr.io/r/utils/debugger.html
+options(error = quote(dump.frames("testdump", TRUE)))
+
 
 ```
+
+#### even simpler
+```{r even_simpler}
+f  <- function() {
+    browser()
+    x  <- "hi"
+    environment()
+}
+
+f()
+
+
+## think you got it??  - SLOWLY
+g  <- function() y = "bye"
+
+f  <- function() {
+      x  <- "hi"
+      browser()
+      g()
+      environment()
+}
+
+f()
+```
+
+
+#### Simplest:  do you understand?
+```{r zero}
+f  <- function() {
+    x <- "hi"
+    stop("testdump frames")
+}
+
+f()
+list.files()
+options(error = NULL)
+```
+
+#### Replay
+```{r replay}
+load("testdump.rda")
+debugger(testdump)
+```
+
+
 
 #### Ex 1: parent.frame? Use parent.frame to find objects in calling env. 
   *  Example 1
   *  https://stackoverflow.com/questions/28641395/what-is-parent-frame-of-r/28641459#28641459
 ```{r parent.frame}
-
-
 ##  Whenever parentls is called, ls reports back about calling environment.
 ##  For parent.frame(n), default value of n is 1.
 
@@ -38,8 +92,6 @@ parentls <- function(n) {
 
 ## Since default of n = 1 in parent.frame, ls reports on  .Globalenv
 parentls()
-
-
 
 ## use `index` to separate from `n`
 a<-function(index=NULL) {
@@ -79,20 +131,18 @@ f <- function() {
    g(x+1)
 }
 g <- function(z) {
-   browser()
+  # browser()
    y = z+2
    return(y)
 }
 }
 f()
-
 ```
 
 #### Ex3: Logging without an error
 https://stackoverflow.com/questions/64698732/how-to-show-stack-trace-without-error-in-r
 
 ```{r logging}
-
 show_stack <- function() {
   cat("#----- Stack containing call to show_stack -----#\n\n")
   x <- sys.calls()
@@ -133,7 +183,6 @@ begin  <- function(e) {
 }
 sapply(c(0, 1,2,3,4,5,6), begin)  # which > 0
 sapply(c(0, -1, -2), begin)   # which <0
-
 ```
 
 #### EX 5:  from ?sys.function
@@ -196,3 +245,42 @@ sapply(c(0, -1, -2), begin)   # which <0
      
 ###
 ```
+
+#### Adv-R, Cube vs Square, Chapter 10, 11
+  *  Show, identical body
+  *  Difference is function environment
+```{r cube}
+```
+
+```{r render, eval=F, include=F}
+output_dir  <- Sys.getenv("OUTPUT_DIR")
+output_dir
+
+{
+file  <-"/home/jim/code/r_environment_code/015_env_puzzles_examples.Rmd"  
+
+## dislike `here`?
+
+## get dir/file name separately, then combine
+ the_dir  <- dirname(file)
+ the_dir
+ file  <- basename(file)
+ file
+ file  <- file.path(the_dir, file)
+ file
+
+#   file  <- here("rmd", file)
+file
+}
+
+### DO NOT KNIT !
+### too many environment levels; 
+### DO NOT KNIT !
+# rmarkdown::render(file,
+                #  output_format="html_document",
+                  output_format="pdf_document",
+                  output_dir=output_dir
+                  )
+```
+
+	 vim:linebreak:nowrap:nospell:cul tw=78 fo=tqlnr foldcolumn=3 

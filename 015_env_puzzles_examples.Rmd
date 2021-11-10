@@ -26,12 +26,16 @@ knitr::opts_chunk$set(echo = TRUE,
                       error = TRUE,
                       collapse = TRUE)
 
+
+## default option
+options(error = NULL)
 if (file.exists("testdump.rda")) file.remove("testdump.rda")
-# from https://rdrr.io/r/utils/debugger.html
-options(error = quote(dump.frames("testdump", TRUE)))
-
-
 ```
+
+### Notes on exists()
+    # must use quote(x)
+    # exists has 3 ways to specifiy env: where, envir, frame=sys.frame(where)
+    # note:  inherit=T by default
 
 #### even simpler
 ```{r even_simpler}
@@ -39,6 +43,10 @@ f  <- function() {
     browser()
     x  <- "hi"
     environment()
+
+    # see note above
+    # if (exists("x", envir = sys.frame())) print(x)
+    # sapply( 0:3, function(x){ls(envir = sys.frame(x))} )
 }
 
 f()
@@ -70,10 +78,57 @@ list.files()
 options(error = NULL)
 ```
 
+#### dump.frames - 1 of 2
+  *  copied from https://rdrr.io/r/utils/debugger.html
+```{r dump.frames}
+options(keep.source=T)
+
+## choose ONE
+options(error = recover)
+# options(error = quote(dump.frames("testdump", TRUE)))
+
+f <- function() {
+    g <- function() stop("test dump.frames")
+    g()
+}
+f()   # will generate a dump on file "testdump.rda"
+options(error = NULL)
+```
+
+#### load, debugger  - restart R - 2 of 2
+```{r debugger}
+load("testdump.rda")
+debugger(testdump)
+```
+
+
+
+
+
+
 #### Replay
 ```{r replay}
 load("testdump.rda")
 debugger(testdump)
+```
+
+
+#### Add a branch?
+```{r branch}
+main  <- function() {
+    f  <- function(x) {
+        print("inside f")
+        1}
+    g  <- function(x) 2
+    browser()
+    res  <- f() |> g()
+    res
+
+    h  <- function() "bye"
+    h()
+
+}
+main()
 ```
 
 
@@ -245,6 +300,20 @@ sapply(c(0, -1, -2), begin)   # which <0
      
 ###
 ```
+
+#### trace   - not working
+```{r simple_trace}
+main  <- function() {
+    x  <- "hi"
+    stop("trouble")
+}
+
+trace(what = main(), 
+      tracer = browser())
+
+untrace(what = main)
+```
+
 
 #### Adv-R, Cube vs Square, Chapter 10, 11
   *  Show, identical body

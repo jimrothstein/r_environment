@@ -37,29 +37,35 @@ if (file.exists("testdump.rda")) file.remove("testdump.rda")
     # exists has 3 ways to specifiy env: where, envir, frame=sys.frame(where)
     # note:  inherit=T by default
 
-#### even simpler
+    # see note above
+    # if (exists("x", envir = sys.frame())) print(x)
+    # sapply( 0:3, function(x){ls(envir = sys.frame(x))} )
+
+#### EXAMPLE:   show execution environment is same as env for frame number sys.frame(sys.nframe())  (here nframe=1)
 ```{r even_simpler}
 f  <- function() {
     browser()
     x  <- "hi"
-    environment()
-
-    # see note above
-    # if (exists("x", envir = sys.frame())) print(x)
-    # sapply( 0:3, function(x){ls(envir = sys.frame(x))} )
+    identical(environment(), sys.frame(sys.nframe()))
 }
 
 f()
+```
 
-
+#### EXAMPLE:  probe execution environments for f and then g
+  * manually confirm sys.* functions make sense.
+  * once browser begins, debug(g) will be certain to show g
+```{r f_g}
 ## think you got it??  - SLOWLY
-g  <- function() y = "bye"
+
+g  <- function() {
+    y = "bye" 
+}
 
 f  <- function() {
-      x  <- "hi"
       browser()
+      x  <- "hi"
       g()
-      environment()
 }
 
 f()
@@ -118,14 +124,20 @@ debugger(testdump)
 main  <- function() {
     f  <- function(x) {
         print("inside f")
-        1}
-    g  <- function(x) 2
+        g(x) 
+        h()
+    }
+    g  <- function(x) { 
+    print("inside g")
     browser()
-    res  <- f() |> g()
-    res
+    x  <- 2
+    }
 
-    h  <- function() "bye"
-    h()
+    h  <- function() {
+        x  <- 1
+        "bye"
+    }
+    f()
 
 }
 main()
@@ -321,6 +333,38 @@ untrace(what = main)
 ```{r cube}
 ```
 
+#### helpers
+```{r}
+
+bug_fun<-function(n)
+{
+	print(parent.frame(n))
+	
+	print(sys.frame(sys.parent(n)))
+}
+
+bug_fun(n=1)
+```
+
+
+#### bquote another way to get value in another frame???
+```{r bquote}
+#  bquote(expr, where = parent.frame(), splice = FALSE)
+f  <- function() {
+    x  <- 1
+    g()
+}
+
+g  <- function() {
+      x  <- 2
+      browser()
+}
+
+## in browser, use quote(.(x), where=parent.frame()) 1
+## in browser, use quote(.(x), where=environment() or where=sys.frame(2)) 2
+f()
+
+```
 ```{r render, eval=F, include=F}
 output_dir  <- Sys.getenv("OUTPUT_DIR")
 output_dir

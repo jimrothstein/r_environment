@@ -24,7 +24,6 @@ knitr::opts_chunk$set(echo = TRUE,
                       comment = "      ##",
                       error = TRUE,
                       collapse = TRUE)
-library(jimTools)
 library(withr)
 ```
 
@@ -64,6 +63,15 @@ neater <- function(x, sig_digits) {
 pi
 neater(pi, 7)
 pi
+```
+
+#### 
+```{r stack}
+f  <- function() {
+    on.exit(expr = print("B"), add = T)
+    print("A")
+}
+f()
 ```
 
 Problem:  Defer runs at end  (when exiting frame)

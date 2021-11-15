@@ -1,4 +1,11 @@
 
+---
+TAGS:  ls(), environment
+---
+
+##  Sun  14 Nov 2021
+Simple examples of ls() and environment
+
 ls() returns objects in character vector.
 ```{r simple}
 x  <- 2
@@ -29,43 +36,50 @@ ls(envir=E1)
 
 E1$x  <- 2
 ls(envir = E1)
+# [1] "x"
 
 ```
 
 
-environment is ....
 environment() returns <env>, one of R's typeof
 ```{r}
 environment()
 typeof(environment())
+# [1] "environment"
 ```
 
 
 
+examine package with as.environemnt(<package>)
+```{r usethis}
+ls(envir=as.environment("package:usethis")) |> head()
+# [1] "browse_circleci"       "browse_cran"          
+# [3] "browse_github"         "browse_github_actions"
+# [5] "browse_github_issues"  "browse_github_pat"    
 
+library(tinytest)
+ls(envir=as.environment("package:tinytest")) |> head()
+# [1] "all_fail"           "all_pass"           "any_fail"          
+# [4] "any_pass"           "at_home"            "build_install_test"
 
-ls(envir=as.environment("package:usethis"))
-And you can add your own, sometimes R creates its won.
+```
 
-Example, Modify f 
+Examine f's execution environement
 ```{r modify_f}
 ls()
 
 f  <- function() {
   z  <- 2
-  print(environment())
-  print(ls())
+  w  <- environment()
 }
 
-ls()  # includes f and g
+w  <- f()
+# <environment: 0x55ece2fcfc70>
 
+typeof(w)
+w$z
+# [1] 2
 ```
-
-```{r f}
-f()
-```
-
-
 
 
 

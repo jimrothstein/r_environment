@@ -15,7 +15,7 @@ output:
     toc_depth:  4 
 fontsize: 10pt 
 geometry: margin=0.5in,top=0.25in 
-TAGS:  env, frame
+TAGS:  env, frame,body,
 ---
 
 \small 
@@ -138,22 +138,24 @@ main()
 
 
 
-#### Ex 1: parent.frame? Use parent.frame to find objects in calling env. 
-  *  Example 1
+#### Ex 1: parent.frame? 
+  *  Use parent.frame to find objects in calling env. 
   *  https://stackoverflow.com/questions/28641395/what-is-parent-frame-of-r/28641459#28641459
 ```{r parent.frame}
 ##  Whenever parentls is called, ls reports back about calling environment.
 ##  For parent.frame(n), default value of n is 1.
 
-parentls <- function(n) {
+parentls <- function(n = 1) {
+  print(parent.frame(n))
   ls(envir=parent.frame(n))
-  # ls(envir=sys.frame(which=-2))   # also works!, but I have coded to use `n`.
 }
 
-## Since default of n = 1 in parent.frame, ls reports on  .Globalenv
+## Since default of n = 1 is parent.frame, ls reports on  .Globalenv
 parentls()
 
 ## use `index` to separate from `n`
+debugonce(a)
+debugonce(b)
 a<-function(index=NULL) {
     x <- 5
     parentls(index)
@@ -337,6 +339,37 @@ bug_fun<-function(generations_back, envir=globalenv())
 }
 
 bug_fun(n=1)
+```
+#### Functions are list-like:  use as.list(body(f))
+```{r list_like}
+f  <- function(x) x + a
+
+body(f)
+# x + a
+
+## body f is really 3 lines.
+as.list(body(f))
+# [[1]]
+# `+`
+# 
+# [[2]]
+# x
+# 
+# [[3]]
+# a
+# 
+
+is.call(body(f))
+# [1] TRUE
+
+is.expression(body(f))
+# [1] FALSE
+
+
+is.call(f)
+# [1] FALSE
+
+
 ```
 
 

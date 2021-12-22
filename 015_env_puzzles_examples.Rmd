@@ -369,28 +369,47 @@ is.expression(body(f))
 is.call(f)
 # [1] FALSE
 
+```
+
+#### What is value of h()?  Evaluate in 2 environments
+```{r simpler}
+main  <- function(){
+    z = 1
+    h  <- function() quote(z+1)
+}
+
+h  <- main()
+h()
+# z + 1
+
+## expected
+eval(h(), envir=environment(h))
+# [1] 2
 
 ```
 
-
-#### bquote another way to get value in another frame???
-```{r bquote}
-#  bquote(expr, where = parent.frame(), splice = FALSE)
+```{r stack }
 f  <- function() {
-    x  <- 1
-    g()
+    z=10
+    calling_env_h  <<- sys.frame(sys.nframe())
+    h()
 }
 
-g  <- function() {
-      x  <- 2
-      browser()
-}
 
-## in browser, use quote(.(x), where=parent.frame()) 1
-## in browser, use quote(.(x), where=environment() or where=sys.frame(2)) 2
-f()
+calling_env_h   
+h1  <- f()
+eval(h1, envir=calling_env_h)
+eval(h1, envir=environment(h))
 
+identical(eval(h, envir=environment(h)), eval(h1, envir=calling_env_h))
+# [1] FALSE
 ```
+
+
+
+
+
+
 ```{r render, eval=F, include=F}
 output_dir  <- Sys.getenv("OUTPUT_DIR")
 output_dir

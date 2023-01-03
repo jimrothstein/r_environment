@@ -1,0 +1,90 @@
+---
+title: "using easystats notes"
+date:  \today 
+pdf-engine: lualatex
+format:
+  pdf: 
+    toc: false
+    toc_depth:  4   
+    number-sections: false
+    colorlinks: true
+    keep_tex:  false
+    include-in-header: 
+      text: |
+        \usepackage[top=.5in, bottom=.5in, left=.5in, right=.5in]{geometry}
+        \usepackage{amsmath,amssymb,amstext,amsfonts}
+        \usepackage{lipsum}
+        \usepackage{setspace}
+#   YAML comment
+#   2nd way, use file
+#format:
+#  pdf: 
+#    include-in-header: 
+#        -   geometry.tex
+---
+
+\section{To run:}
+
+- quarto preview <file> --to pdf    # (opens in a viewer)
+- quarto render %	; zathura         # not quite right cli
+
+- math mode latex,  seems to work if *outside* R chunk
+$$
+x^2
+$$
+
+\section{local( {})
+basic use of local({}, envir = )
+-   its own environment
+```{r}
+rm(x)
+x
+x = 100
+ans= local( 
+{
+    x=10
+    print(environment())
+    print(x)
+},
+    )
+ans
+print(environment())
+x
+
+
+environmentName(environment())
+```
+
+\subsection{local can use to evaluate R expression in different environment}
+```{r}
+x  <- 0
+
+e1  <- new.env()
+e1$x  <- 1
+
+e2  <- new.env()
+e2$x   <- 2
+
+local( envir = globalenv(), {print(x)})
+local( envir = e1, {print(x)})
+local( envir = e2, {print(x)})
+x
+
+```
+
+local(exprs, envir=env.new())
+```{r local}
+print(pi)
+local( {
+  browser() 
+  old  <- getOption("digits")    # 3
+  options(digits = 7)
+  print(pi)
+  options(digits = old)   # reset, quote req'd
+  }
+)
+print(pi)
+
+options(digits =4)
+options(digits =3  )
+```
